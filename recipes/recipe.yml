@@ -1,21 +1,25 @@
 name: moj-bazzite
-description: Bazzite z kernelem 7.0 (nadpisanie bazy systemowej)
+description: Bazzite z kernelem 7.0 (czysta instalacja przez override)
 base-image: ghcr.io/ublue-os/bazzite-deck-nvidia
 image-version: stable
 
 modules:
   - type: rpm-ostree
-    repos:
-      - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/
-    replace:
-      - from-repo: https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/
-        packages:
-          - kernel
-          - kernel-core
-          - kernel-modules
-          - kernel-modules-core
-          - kernel-modules-extra
-          - kernel-devel
+    # Najpierw usuwamy stare pakiety, by zrobić miejsce dla nowych
+    remove:
+      - kernel
+      - kernel-core
+      - kernel-modules
+      - kernel-modules-core
+      - kernel-modules-extra
+    # Teraz instalujemy nowe jądro z Twoich sprawdzonych linków
+    install:
+      - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-7.0.0-62.fc45.x86_64.rpm
+      - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-core-7.0.0-62.fc45.x86_64.rpm
+      - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-modules-7.0.0-62.fc45.x86_64.rpm
+      - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-modules-core-7.0.0-62.fc45.x86_64.rpm
+      - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-modules-extra-7.0.0-62.fc45.x86_64.rpm
+      - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-devel-7.0.0-62.fc45.x86_64.rpm
 
   - type: akmods
     install:
