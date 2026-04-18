@@ -1,18 +1,22 @@
 name: moj-bazzite
-description: Bazzite z kernelem 7.0 (czysta instalacja przez override)
+description: Bazzite z kernelem 7.0 - pełne nadpisanie blokujących zależności
 base-image: ghcr.io/ublue-os/bazzite-deck-nvidia
 image-version: stable
 
 modules:
   - type: rpm-ostree
-    # Najpierw usuwamy stare pakiety, by zrobić miejsce dla nowych
+    # Usuwamy wszystko, co blokuje zmianę wersji jądra
     remove:
       - kernel
       - kernel-core
       - kernel-modules
       - kernel-modules-core
       - kernel-modules-extra
-    # Teraz instalujemy nowe jądro z Twoich sprawdzonych linków
+      - kernel-devel
+      - kernel-devel-matched
+      - kernel-modules-akmods
+      - kernel-nvidia
+    # Instalujemy nowe jądro
     install:
       - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-7.0.0-62.fc45.x86_64.rpm
       - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-core-7.0.0-62.fc45.x86_64.rpm
