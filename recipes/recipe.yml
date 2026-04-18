@@ -1,5 +1,5 @@
 name: moj-bazzite
-description: Bazzite z kernelem 7.0 (czysta podmiana)
+description: Bazzite z kernelem 7.0 (pobieranie bezposrednie)
 base-image: ghcr.io/ublue-os/bazzite-deck-nvidia
 image-version: stable
 
