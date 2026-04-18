@@ -1,10 +1,19 @@
 name: moj-bazzite
-description: Bazzite z kernelem 7.0 pobranym bezpośrednio z serwerów mirrora (fr2.rpmfind.net)
+description: Bazzite z kernelem 7.0 (zastąpienie bazy)
 base-image: ghcr.io/ublue-os/bazzite-deck-nvidia
 image-version: stable
 
 modules:
   - type: rpm-ostree
+    replace:
+      - from-repo: https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/
+        packages:
+          - kernel
+          - kernel-core
+          - kernel-modules
+          - kernel-modules-core
+          - kernel-modules-extra
+          - kernel-devel
     install:
       - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-7.0.0-62.fc45.x86_64.rpm
       - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-core-7.0.0-62.fc45.x86_64.rpm
