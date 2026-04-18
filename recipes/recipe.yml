@@ -1,21 +1,17 @@
 name: moj-bazzite
-description: Bazzite z najnowszym kernelem vanilla 7.0
+description: Bazzite z kernelem 7.0 pobranym bezpośrednio z serwerów mirrora (fr2.rpmfind.net)
 base-image: ghcr.io/ublue-os/bazzite-deck-nvidia
 image-version: stable
 
 modules:
   - type: rpm-ostree
-    repos:
-      - https://copr.fedorainfracloud.org/coprs/g/kernel-vanilla/mainline/repo/fedora-43/group_kernel-vanilla-mainline-fedora-43.repo
-    replace:
-      - from-repo: copr:copr.fedorainfracloud.org:group_kernel-vanilla:mainline
-        packages:
-          - kernel
-          - kernel-core
-          - kernel-modules
-          - kernel-modules-core
-          - kernel-modules-extra
-          - kernel-devel
+    install:
+      - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-7.0.0-62.fc45.x86_64.rpm
+      - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-core-7.0.0-62.fc45.x86_64.rpm
+      - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-modules-7.0.0-62.fc45.x86_64.rpm
+      - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-modules-core-7.0.0-62.fc45.x86_64.rpm
+      - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-modules-extra-7.0.0-62.fc45.x86_64.rpm
+      - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-devel-7.0.0-62.fc45.x86_64.rpm
 
   - type: akmods
     install:
