@@ -1,7 +1,12 @@
+name: moj-bazzite
+description: Bazzite z najnowszym kernelem vanilla 7.0
+base-image: ghcr.io/ublue-os/bazzite-deck-nvidia
+image-version: stable
+
 modules:
   - type: rpm-ostree
     repos:
-      - https://copr.fedorainfracloud.org/coprs/g/kernel-vanilla/mainline/repo/fedora-rawhide/group_kernel-vanilla-mainline-fedora-rawhide.repo
+      - https://copr.fedorainfracloud.org/coprs/g/kernel-vanilla/mainline/repo/fedora-43/group_kernel-vanilla-mainline-fedora-43.repo
     replace:
       - from-repo: copr:copr.fedorainfracloud.org:group_kernel-vanilla:mainline
         packages:
