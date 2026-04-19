@@ -1,5 +1,5 @@
 name: moj-bazzite
-description: Bazzite z kernelem 7.0 - Próba siłowa (Tym razem poprawna)
+description: Bazzite z podmienionym kernelem - Poprawna transakcja
 base-image: ghcr.io/ublue-os/bazzite-deck
 image-version: stable
 
@@ -7,17 +7,19 @@ modules:
   - type: script
     snippets:
       - |
-        # 1. Usuwamy pakiety zależne, które trzymają stare jądro (bez ignorowania błędów!)
-        rpm-ostree override remove kernel-devel-matched kernel-modules-akmods usbip
-        
-        # 2. Podmieniamy jądro w jednej potężnej transakcji (override replace)
+        # Wykonujemy jedną, atomową transakcję:
+        # 1. Usuwamy pakiety konfliktujące (--remove)
+        # 2. Zastępujemy bazowe jądro nowymi plikami z URL
         rpm-ostree override replace \
-          https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-7.0.0-62.fc45.x86_64.rpm \
-          https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-core-7.0.0-62.fc45.x86_64.rpm \
-          https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-modules-7.0.0-62.fc45.x86_64.rpm \
-          https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-modules-core-7.0.0-62.fc45.x86_64.rpm \
-          https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-modules-extra-7.0.0-62.fc45.x86_64.rpm \
-          https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-devel-7.0.0-62.fc45.x86_64.rpm
+          --remove=kernel-devel-matched \
+          --remove=kernel-modules-akmods \
+          --remove=usbip \
+          https://mirrors.fedora.is/fedora/linux/releases/44/Everything/x86_64/os/Packages/k/kernel-6.19.6-200.fc44.x86_64.rpm \
+          https://mirrors.fedora.is/fedora/linux/releases/44/Everything/x86_64/os/Packages/k/kernel-core-6.19.6-200.fc44.x86_64.rpm \
+          https://mirrors.fedora.is/fedora/linux/releases/44/Everything/x86_64/os/Packages/k/kernel-modules-6.19.6-200.fc44.x86_64.rpm \
+          https://mirrors.fedora.is/fedora/linux/releases/44/Everything/x86_64/os/Packages/k/kernel-modules-core-6.19.6-200.fc44.x86_64.rpm \
+          https://mirrors.fedora.is/fedora/linux/releases/44/Everything/x86_64/os/Packages/k/kernel-modules-extra-6.19.6-200.fc44.x86_64.rpm \
+          https://mirrors.fedora.is/fedora/linux/releases/44/Everything/x86_64/os/Packages/k/kernel-devel-6.19.6-200.fc44.x86_64.rpm
 
   - type: akmods
     install:
