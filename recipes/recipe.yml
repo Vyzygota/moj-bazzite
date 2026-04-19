@@ -1,5 +1,5 @@
 name: moj-bazzite
-description: Bazzite z podmienionym kernelem - Poprawna transakcja z dobrymi linkami
+description: Bazzite z kernelem 7.0 i własnymi modułami NVIDIA
 base-image: ghcr.io/ublue-os/bazzite-deck
 image-version: stable
 
@@ -7,8 +7,7 @@ modules:
   - type: script
     snippets:
       - |
-        # Atomowa transakcja: usuwamy pakiety konfliktujące i w to samo miejsce
-        # ładujemy kernel 7.0 z Twoich działających linków.
+        # Podmieniamy kernel na wersję 7.0.0
         rpm-ostree override replace \
           --remove=kernel-devel-matched \
           --remove=kernel-modules-akmods \
@@ -20,6 +19,11 @@ modules:
           https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-modules-extra-7.0.0-62.fc45.x86_64.rpm \
           https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-devel-7.0.0-62.fc45.x86_64.rpm
 
+  # --- TUTAJ DZIEJE SIĘ MAGIA ---
   - type: akmods
+    base: "" # Usuwamy domyślne repo
     install:
       - nvidia
+    # I wskazujemy nasz własny, świeżo zbudowany obraz!
+    # Jeśli Twoje pakiety są publiczne, to wystarczy ścieżka.
+    # Ważne: to odniesienie to nieoficjalny, manualny sposób wymuszenia innego obrazu akmods w skryptach BlueBuild.
