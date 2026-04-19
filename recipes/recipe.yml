@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
 name: moj-bazzite
 description: Bazzite z kernelem 7.0 i własnymi modułami NVIDIA
-base-image: ghcr.io/ublue-os/bazzite-deck-nvidia  # <-- ZMIANA BAZY
+base-image: ghcr.io/ublue-os/bazzite-deck-nvidia
 image-version: stable
 
 modules:
@@ -14,12 +14,12 @@ modules:
     snippets:
       - |
         echo "Podmieniam kernel i instaluję nowy moduł NVIDIA w jednym kroku..."
-        # Zauważ, że ścieżkę do Twojego RPM-a dopisaliśmy na samym końcu polecenia.
-        # rpm-ostree podmieni stary kernel i stary moduł na Twoje nowe pliki, pilnując zależności.
+        # Dodane --remove=kernel-nvidia aby odpiąć stary sterownik od starego kernela
         rpm-ostree override replace \
           --remove=kernel-devel-matched \
           --remove=kernel-modules-akmods \
           --remove=usbip \
+          --remove=kernel-nvidia \
           https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-7.0.0-62.fc45.x86_64.rpm \
           https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-core-7.0.0-62.fc45.x86_64.rpm \
           https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-modules-7.0.0-62.fc45.x86_64.rpm \
