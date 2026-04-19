@@ -1,13 +1,15 @@
 name: bluebuild
 on:
   schedule:
-    - cron: "00 06 * * *"
+    - cron: "00 06 * * *" # Buduje codziennie o 6:00 UTC
   push:
     paths-ignore:
-      - "**.md"
-  workflow_dispatch:
+      - "**.md" # Ignoruje zmiany w plikach dokumentacji
+  pull_request:
+  workflow_dispatch: # Pozwala na ręczne uruchomienie z zakładki Actions
 
 concurrency:
+  # Zapewnia, że w danym momencie działa tylko jedno zadanie budowania
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
@@ -25,7 +27,7 @@ jobs:
         recipe:
           - recipe.yml
     steps:
-      - name: Build Custom Image 2
+      - name: Build Custom Image
         uses: blue-build/github-action@v1.11
         with:
           recipe: ${{ matrix.recipe }}
@@ -36,17 +38,19 @@ jobs:
           build_opts: "-vv"
 
   build-iso:
-    name: Build and Upload to Google Drive
+    name: Build and Upload ISO to Google Drive
     runs-on: ubuntu-latest
-    needs: bluebuild
+    needs: bluebuild # Czeka, aż obraz kontenera zostanie zbudowany i wysłany
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      # 1. Generujemy dzisiejszą datę do nazwy pliku
       - name: Get current date
         id: date
         run: echo "today=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
 
+      # 2. Budujemy czyste ISO
       - name: Build ISO
         uses: jasonn3/build-container-installer@v1.2.2
         with:
@@ -56,13 +60,18 @@ jobs:
           image_tag: latest
           version: 43
           variant: Kinoite
+          # Nazwa wyjściowego pliku ISO, np. moj-bazzite-20260419.iso
           iso_name: moj-bazzite-${{ steps.date.outputs.today }}.iso
 
-      # WYSYŁKA NA GOOGLE DRIVE
+      # 3. Wysyłamy ISO bezpośrednio na Google Drive
       - name: Upload ISO to Google Drive
-        uses: adityak74/google-drive-upload-git-action@main
+        uses: work-solutions/google-drive-upload@v1
         with:
+          # Dane z klucza JSON, który wygenerowałeś
           credentials: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
-          filename: ./moj-bazzite-${{ steps.date.outputs.today }}.iso
+          # ID folderu na Twoim dysku Google
           folderId: ${{ secrets.GDRIVE_FOLDER_ID }}
+          # Plik, który został wygenerowany krok wcześniej
+          filename: moj-bazzite-${{ steps.date.outputs.today }}.iso
+          # false = jeśli plik o tej nazwie istnieje, doda (1) do nazwy zamiast nadpisywać
           overwrite: "false"
