@@ -1,20 +1,15 @@
 name: moj-bazzite
-description: Bazzite z kernelem 7.0 - Metoda czystej budowy
-# ZMIANA: Używamy bazy bez preinstalowanej Nvidii, by uniknąć konfliktów
+description: Bazzite z kernelem 7.0 - Wymuszona czystka zależności
 base-image: ghcr.io/ublue-os/bazzite-deck
 image-version: stable
 
 modules:
+  - type: script
+    # Usuwamy paczki, które "płaczą" o wersję jądra, zanim w ogóle ruszy rpm-ostree
+    snippets:
+      - "rpm-ostree override remove kernel kernel-core kernel-modules kernel-modules-core kernel-modules-extra kernel-devel kernel-devel-matched kernel-modules-akmods usbip --size-policy=0 || true"
+
   - type: rpm-ostree
-    # Usuwamy standardowy kernel (bez obaw o zależności Nvidii, bo ich tu nie ma)
-    remove:
-      - kernel
-      - kernel-core
-      - kernel-modules
-      - kernel-modules-core
-      - kernel-modules-extra
-      - kernel-devel
-    # Instalujemy Twój kernel 7.0
     install:
       - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-7.0.0-62.fc45.x86_64.rpm
       - https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-core-7.0.0-62.fc45.x86_64.rpm
@@ -25,4 +20,4 @@ modules:
 
   - type: akmods
     install:
-      - nvidia # To skompiluje sterownik NVIDIA specjalnie pod kernel 7.0
+      - nvidia
