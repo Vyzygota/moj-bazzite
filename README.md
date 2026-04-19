@@ -15,8 +15,11 @@ Security: Built-in Kleopatra for advanced GPG/encryption management.
 📥 Installation (Rebase)
 If you are already on Bazzite or any Fedora-based atomic desktop, you can switch to this image with a single command:
 
-Bash
+Bash:
+```
 rpm-ostree rebase ostree-unverified-registry:ghcr.io/vyzygota/moj-bazzite:latest
+```
+
 ⚙️ Build System
 This repository uses BlueBuild to ensure a consistent, reliable, and reproducible build process via GitHub Actions. Every update to this repository triggers a fresh build with the newest available packages.
 
