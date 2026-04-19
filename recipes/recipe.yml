@@ -21,8 +21,8 @@ modules:
 
   # --- TUTAJ JEST POPRAWKA ---
   - type: akmods
-    # Mówimy BlueBuildowi, żeby nie używał swojego domyślnego kontenera ublue,
-    # tylko Twojego, gdzie już czekają gotowe RPM-y pod kernel 7.0
-    image-repo: ghcr.io/vyzygota/akmods-nvidia-7.0
+    # W BlueBuild 'base' to nazwa obrazu, z którego kopiowane są RPM-y.
+    # Podając pełny adres Twojego obrazu, zmuszamy moduł do pobrania paczek od Ciebie.
+    base: ghcr.io/vyzygota/akmods-nvidia-7.0
     install:
       - nvidia
