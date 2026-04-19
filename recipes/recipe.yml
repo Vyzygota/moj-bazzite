@@ -7,7 +7,7 @@ modules:
   - type: script
     snippets:
       - |
-        # 1. Podmieniamy kernel
+        # 1. Podmieniamy kernel na 7.0 (to już wiemy, że działa)
         rpm-ostree override replace \
           --remove=kernel-devel-matched \
           --remove=kernel-modules-akmods \
@@ -19,18 +19,10 @@ modules:
           https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-modules-extra-7.0.0-62.fc45.x86_64.rpm \
           https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-devel-7.0.0-62.fc45.x86_64.rpm
 
-      - |
-        # 2. Ręczne pobranie i instalacja NASZYCH sterowników Nvidii z Twojego kontenera
-        # Pobieramy kontener do folderu tymczasowego za pomocą skopeo/umoci
-        mkdir -p /tmp/nvidia-akmods
-        skopeo copy docker://ghcr.io/vyzygota/akmods-nvidia-7.0:latest oci:/tmp/nvidia-akmods:latest
-        
-        # Wyciągamy pakiety RPM z obrazu kontenera
-        # (W systemach ostree często nie ma umoci, więc użyjemy podmana jeśli to możliwe, 
-        # lub po prostu wyciągniemy zawartość archiwum warstwy)
-        podman create --name temp_nvidia ghcr.io/vyzygota/akmods-nvidia-7.0:latest
-        podman cp temp_nvidia:/rpms /tmp/nvidia-rpms
-        podman rm temp_nvidia
-
-        # Instalujemy wyciągnięte paczki RPM Nvidii
-        rpm-ostree install /tmp/nvidia-rpms/*.rpm
+  # --- TUTAJ JEST POPRAWKA ---
+  - type: akmods
+    # Mówimy BlueBuildowi, żeby nie używał swojego domyślnego kontenera ublue,
+    # tylko Twojego, gdzie już czekają gotowe RPM-y pod kernel 7.0
+    image-repo: ghcr.io/vyzygota/akmods-nvidia-7.0
+    install:
+      - nvidia
