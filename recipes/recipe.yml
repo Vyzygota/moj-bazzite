@@ -9,7 +9,7 @@ modules:
     repos:
       - https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
     install:
-      - brave-browser
+      # Usunięto brave-browser, instalowany jako flatpak
       # Usunięto proton-ge-custom
       - kleopatra
 
@@ -18,7 +18,8 @@ modules:
     configurations:
       - scope: user
         install:
-          - net.davidotek.pupgui2 # ProtonUp-Qt do instalacji i zarządzania Proton-GE
+          - com.brave.Browser       # Przeglądarka Brave
+          - net.davidotek.pupgui2   # ProtonUp-Qt do instalacji i zarządzania Proton-GE
 
   # 3. Kopiowanie skompilowanych sterowników NVIDIA
   - type: copy
