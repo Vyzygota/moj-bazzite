@@ -1,13 +1,22 @@
+# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
 name: moj-bazzite
 description: Bazzite z kernelem 7.0 i własnymi modułami NVIDIA
 base-image: ghcr.io/ublue-os/bazzite-deck
 image-version: stable
 
 modules:
+  # KROK 1: Wyciągamy Twoje RPM-y z kontenera "fabryki"
+  # To jest w 100% legalne w BlueBuild i przejdzie walidację.
+  - type: copy
+    from: ghcr.io/vyzygota/akmods-nvidia-7.0:latest
+    src: /rpms
+    dest: /tmp/nvidia-rpms
+
   - type: script
     snippets:
       - |
-        # 1. Podmieniamy kernel na 7.0 (to już wiemy, że działa)
+        # KROK 2: Podmiana kernela na 7.0.0-62.fc45
+        echo "Podmieniam kernel..."
         rpm-ostree override replace \
           --remove=kernel-devel-matched \
           --remove=kernel-modules-akmods \
@@ -19,10 +28,10 @@ modules:
           https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-modules-extra-7.0.0-62.fc45.x86_64.rpm \
           https://fr2.rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/k/kernel-devel-7.0.0-62.fc45.x86_64.rpm
 
-  # --- TUTAJ JEST POPRAWKA ---
-  - type: akmods
-    # W BlueBuild 'base' to nazwa obrazu, z którego kopiowane są RPM-y.
-    # Podając pełny adres Twojego obrazu, zmuszamy moduł do pobrania paczek od Ciebie.
-    base: ghcr.io/vyzygota/akmods-nvidia-7.0
-    install:
-      - nvidia
+      - |
+        # KROK 3: Instalacja sterowników NVIDIA, które skopiowaliśmy w kroku 1
+        echo "Instaluję własne paczki RPM NVIDIA..."
+        # Sprawdzamy czy pliki są na miejscu
+        ls -lh /tmp/nvidia-rpms/
+        # Właściwa instalacja
+        rpm-ostree install /tmp/nvidia-rpms/*.rpm
