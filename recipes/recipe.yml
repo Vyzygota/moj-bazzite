@@ -13,12 +13,12 @@ modules:
       # Usunięto proton-ge-custom
       - kleopatra
 
-  # 2. Zarządzanie pakietami Flatpak (usuwanie domyślnego Firefoxa)
+# 2. Zarządzanie pakietami Flatpak (nowa składnia v2)
   - type: default-flatpaks
-    system:
-      remove:
-        - org.mozilla.firefox
-        - org.mozilla.firefox.Locale
+    configurations:
+      - scope: user
+        install:
+          - net.davidotek.pupgui2 # ProtonUp-Qt do instalacji i zarządzania Proton-GE
 
   # 3. Kopiowanie skompilowanych sterowników NVIDIA
   - type: copy
