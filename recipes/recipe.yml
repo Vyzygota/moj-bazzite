@@ -12,7 +12,6 @@ modules:
       - brave-browser
       - proton-ge-custom
       - kleopatra
-    # USUNIĘTO sekcję remove, bo Firefoxa nie ma w RPM!
 
   # 2. Zarządzanie pakietami Flatpak (usuwanie domyślnego Firefoxa)
   - type: default-flatpaks
