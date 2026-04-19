@@ -4,25 +4,30 @@ base-image: ghcr.io/ublue-os/bazzite-deck-nvidia
 image-version: stable
 
 modules:
-  # 1. Zarządzanie pakietami systemowymi
+  # 1. Zarządzanie pakietami systemowymi RPM
   - type: rpm-ostree
     repos:
       - https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
     install:
       - brave-browser
       - proton-ge-custom
-      - kleopatra          # Dodano: Graficzny interfejs dla GPG
-    remove:
-      - firefox
-      - firefox-langpacks
+      - kleopatra
+    # USUNIĘTO sekcję remove, bo Firefoxa nie ma w RPM!
 
-  # 2. Kopiowanie skompilowanych sterowników NVIDIA
+  # 2. Zarządzanie pakietami Flatpak (usuwanie domyślnego Firefoxa)
+  - type: default-flatpaks
+    system:
+      remove:
+        - org.mozilla.firefox
+        - org.mozilla.firefox.Locale
+
+  # 3. Kopiowanie skompilowanych sterowników NVIDIA
   - type: copy
     from: ghcr.io/vyzygota/akmods-nvidia-7.0:latest
     src: /rpms
     dest: /tmp/nvidia-rpms
 
-  # 3. Skrypt podmieniający Kernel na najnowszy z Rawhide
+  # 4. Skrypt podmieniający Kernel na najnowszy z Rawhide
   - type: script
     snippets:
       - |
