@@ -1,17 +1,13 @@
 name: bluebuild
 on:
   schedule:
-    - cron:
-        "00 06 * * *" # build at 06:00 UTC every day
-        # (20 minutes after last ublue images start building)
+    - cron: "00 06 * * *"
   push:
-    paths-ignore: # don't rebuild if only documentation has changed
+    paths-ignore:
       - "**.md"
-  pull_request:
-  workflow_dispatch: # allow manually triggering builds
+  workflow_dispatch:
 
 concurrency:
-  # only run one build at a time
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
@@ -24,13 +20,11 @@ jobs:
       packages: write
       id-token: write
     strategy:
-      fail-fast: false # stop GH from cancelling all matrix builds if one fails
+      fail-fast: false
       matrix:
         recipe:
-          # !! Add your recipes here
           - recipe.yml
     steps:
-      # the build is fully handled by the reusable github action
       - name: Build Custom Image 2
         uses: blue-build/github-action@v1.11
         with:
@@ -38,28 +32,21 @@ jobs:
           cosign_private_key: ${{ secrets.SIGNING_SECRET }}
           registry_token: ${{ github.token }}
           pr_event_number: ${{ github.event.number }}
-          # enabled by default, disable if your image is small and you want faster builds
           maximize_build_space: true
           build_opts: "-vv"
 
   build-iso:
-    name: Build and Manage ISO
+    name: Build and Upload to Google Drive
     runs-on: ubuntu-latest
-    needs: bluebuild # Czeka na zakończenie zadania 'bluebuild'
-    permissions:
-      contents: read
-      packages: read
-      actions: write # Wymagane do usuwania starych artefaktów
+    needs: bluebuild
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # 1. Generujemy datę kompilacji
       - name: Get current date
         id: date
         run: echo "today=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
 
-      # 2. Budujemy ISO z datą w nazwie
       - name: Build ISO
         uses: jasonn3/build-container-installer@v1.2.2
         with:
@@ -69,22 +56,13 @@ jobs:
           image_tag: latest
           version: 43
           variant: Kinoite
-          # Nazwa pliku wewnątrz ZIP-a, np. moj-bazzite-20260419.iso
           iso_name: moj-bazzite-${{ steps.date.outputs.today }}.iso
 
-      # 3. Wysyłamy plik jako artefakt
-      - name: Upload ISO as artifact
-        uses: actions/upload-artifact@v4
+      # WYSYŁKA NA GOOGLE DRIVE
+      - name: Upload ISO to Google Drive
+        uses: adityak74/google-drive-upload-git-action@main
         with:
-          # Nazwa paczki ZIP w zakładce Actions
-          name: bazzite-iso-${{ steps.date.outputs.today }}
-          path: ./*.iso
-          retention-days: 90
-
-      # 4. Automatyczne usuwanie starych wersji - zostawiamy tylko 2 ostatnie
-      - name: Keep only last 2 ISOs
-        uses: pksol/keep-last-artifacts-action@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          prefix: 'bazzite-iso-'
-          keep_last: 2
+          credentials: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+          filename: ./moj-bazzite-${{ steps.date.outputs.today }}.iso
+          folderId: ${{ secrets.GDRIVE_FOLDER_ID }}
+          overwrite: "false"
