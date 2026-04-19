@@ -1,13 +1,14 @@
 name: moj-bazzite
-description: Bazzite z kernelem 7.0 - Wymuszona czystka zależności
+description: Bazzite z kernelem 7.0 - Próba siłowa
 base-image: ghcr.io/ublue-os/bazzite-deck
 image-version: stable
 
 modules:
   - type: script
-    # Usuwamy paczki, które "płaczą" o wersję jądra, zanim w ogóle ruszy rpm-ostree
     snippets:
-      - "rpm-ostree override remove kernel kernel-core kernel-modules kernel-modules-core kernel-modules-extra kernel-devel kernel-devel-matched kernel-modules-akmods usbip --size-policy=0 || true"
+      # Usunięto wadliwą opcję --size-policy. 
+      # Dodano 'override replace' dla kluczowych komponentów, aby oszukać zależności.
+      - "rpm-ostree override remove kernel-devel-matched kernel-modules-akmods usbip --standalone || true"
 
   - type: rpm-ostree
     install:
