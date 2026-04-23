@@ -57,7 +57,10 @@ modules:
         NEW_KERNEL=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" -p /tmp/latest-kernel/kernel-core-*.rpm | head -n 1)
         mkdir -p /usr/lib/modules/$NEW_KERNEL/extra/lenovo
         # POPRAWIONA ŚCIEŻKA (zgodna z Containerfile Twojego repo sterowników)
-        cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$NEW_KERNEL/extra/lenovo/
+        # cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$NEW_KERNEL/extra/lenovo/
+        if ls /tmp/custom-rpms/kmods/*.ko 2>/dev/null; then
+          cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$NEW_KERNEL/extra/lenovo/
+        fi
         depmod -a $NEW_KERNEL
 
         echo "Instalacja GUI Lenovo..."
