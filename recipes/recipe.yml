@@ -6,14 +6,10 @@ image-version: stable
 modules:
   # 1. Zarządzanie pakietami systemowymi RPM
   - type: rpm-ostree
-    repos:
-      - https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
     install:
-      # Usunięto brave-browser, instalowany jako flatpak
-      # Usunięto proton-ge-custom
       - kleopatra
 
-# 2. Zarządzanie pakietami Flatpak (nowa składnia v2)
+  # 2. Zarządzanie pakietami Flatpak (nowa składnia v2)
   - type: default-flatpaks
     configurations:
       - scope: user
@@ -25,7 +21,7 @@ modules:
   - type: copy
     from: ghcr.io/vyzygota/akmods-nvidia-7.0:latest
     src: /rpms
-    dest: /tmp/nvidia-rpms
+    dest: /tmp/custom-rpms
 
   # 4. Skrypt podmieniający Kernel na najnowszy z Rawhide
   - type: script
@@ -52,4 +48,4 @@ modules:
           --remove=usbip \
           --remove=kernel-nvidia \
           /tmp/latest-kernel/*.rpm \
-          /tmp/nvidia-rpms/*.rpm
+          /tmp/custom-rpms/*.rpm
