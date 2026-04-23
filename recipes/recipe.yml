@@ -10,7 +10,7 @@ modules:
       - copr:mrduarte/LenovoLegionLinux
     install:
       - kleopatra
-      - python-LenovoLegionLinux # To jest aplikacja GUI od Lenovo
+      # - python-LenovoLegionLinux # To jest aplikacja GUI od Lenovo
 
   # 2. Zarządzanie pakietami Flatpak
   - type: default-flatpaks
@@ -58,3 +58,6 @@ modules:
         mkdir -p /usr/lib/modules/$NEW_KERNEL/extra/lenovo
         cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$NEW_KERNEL/extra/lenovo/
         depmod -a $NEW_KERNEL
+
+        echo "Instalacja GUI Lenovo..."
+        dnf5 install -y --copr mrduarte/LenovoLegionLinux python-LenovoLegionLinux
