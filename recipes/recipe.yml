@@ -38,12 +38,12 @@ modules:
         enabled=1
         gpgcheck=0
         EOF
-        
+
         echo "Pobieram najnowszy kernel..."
         mkdir -p /tmp/latest-kernel
         cd /tmp/latest-kernel
         dnf5 download kernel kernel-core kernel-modules kernel-modules-core kernel-modules-extra kernel-devel --disablerepo="*" --enablerepo="rawhide"
-        
+
         echo "Finalna podmiana Kernela i Nvidii..."
         rpm-ostree override replace \
           --remove=kernel-devel-matched \
@@ -56,8 +56,11 @@ modules:
         echo "Wpinanie surowych modułów Lenovo..."
         NEW_KERNEL=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" -p /tmp/latest-kernel/kernel-core-*.rpm | head -n 1)
         mkdir -p /usr/lib/modules/$NEW_KERNEL/extra/lenovo
+        # POPRAWIONA ŚCIEŻKA (zgodna z Containerfile Twojego repo sterowników)
         cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$NEW_KERNEL/extra/lenovo/
         depmod -a $NEW_KERNEL
 
         echo "Instalacja GUI Lenovo..."
-        dnf5 install -y --copr mrduarte/LenovoLegionLinux python-LenovoLegionLinux
+        # POPRAWIONA SKŁADNIA DNF5 DLA COPR
+        dnf5 copr enable -y mrduarte/LenovoLegionLinux
+        dnf5 install -y python-LenovoLegionLinux
