@@ -6,24 +6,27 @@ image-version: stable
 modules:
   # 1. Zarządzanie pakietami systemowymi RPM
   - type: rpm-ostree
+    repos:
+      - copr:mrduarte/LenovoLegionLinux
     install:
       - kleopatra
+      - python-LenovoLegionLinux # To jest aplikacja GUI od Lenovo
 
-  # 2. Zarządzanie pakietami Flatpak (nowa składnia v2)
+  # 2. Zarządzanie pakietami Flatpak
   - type: default-flatpaks
     configurations:
       - scope: user
         install:
-          - com.brave.Browser       # Przeglądarka Brave
-          - net.davidotek.pupgui2   # ProtonUp-Qt do instalacji i zarządzania Proton-GE
+          - com.brave.Browser       
+          - net.davidotek.pupgui2   
 
-  # 3. Kopiowanie skompilowanych sterowników NVIDIA
+  # 3. Kopiowanie sterowników NVIDIA (.rpm) i Lenovo (.ko)
   - type: copy
     from: ghcr.io/vyzygota/akmods-nvidia-7.0:latest
     src: /rpms
     dest: /tmp/custom-rpms
 
-  # 4. Skrypt podmieniający Kernel na najnowszy z Rawhide
+  # 4. Skrypt podmieniający Kernel
   - type: script
     snippets:
       - |
@@ -49,3 +52,9 @@ modules:
           --remove=kernel-nvidia \
           /tmp/latest-kernel/*.rpm \
           /tmp/custom-rpms/*.rpm
+          
+        echo "Wpinanie surowych modułów Lenovo..."
+        NEW_KERNEL=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" -p /tmp/latest-kernel/kernel-core-*.rpm | head -n 1)
+        mkdir -p /usr/lib/modules/$NEW_KERNEL/extra/lenovo
+        cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$NEW_KERNEL/extra/lenovo/
+        depmod -a $NEW_KERNEL
