@@ -16,12 +16,10 @@ modules:
         echo "=========================================================="
         echo "1. Wstrzykiwanie Rdzenia: Najnowszy Linux Kernel + NVIDIA"
         echo "=========================================================="
-        rpm-ostree override replace \
-          --remove=kernel-devel-matched \
-          --remove=kernel-nvidia \
-          /tmp/custom-rpms/kernel/*.rpm
-          
-        NEW_KERNEL=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" -p /tmp/custom-rpms/kernel/kernel-core-*.rpm | head -n 1)
-        mkdir -p /usr/lib/modules/$NEW_KERNEL/extra/custom
-        cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$NEW_KERNEL/extra/custom/
-        depmod -a $NEW_KERNEL
+        # Pobieramy wersje biezacego kernela zainstalowanego w obrazie Bazzite
+        CURRENT_KERNEL=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" kernel | head -n 1)
+        
+        echo "Wstrzykiwanie wlasnych modulow (*.ko) do kernela: $CURRENT_KERNEL"
+        mkdir -p /usr/lib/modules/$CURRENT_KERNEL/extra/custom
+        cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$CURRENT_KERNEL/extra/custom/
+        depmod -a $CURRENT_KERNEL
