@@ -1,13 +1,15 @@
-name: pancernik-os
-description: Pancernik OS - Samonaprawiający się, ciągle aktualny system z agentem AI
+name: moj-bazzite
+description: Mój Bazzite - ciągle aktualny system ze zbudowaną Nvidią i agentem AI
 base-image: ghcr.io/ublue-os/bazzite-deck
 # Bazzite pobierany w wersji absolutnie najświeższej z dnia budowania
 image-version: latest
+
 modules:
   - type: copy
-    from: ghcr.io/vyzygota/akmods-pancernik:latest
+    from: ghcr.io/vyzygota/akmods-nvidia-7.0:latest
     src: /rpms
     dest: /tmp/custom-rpms
+
   - type: script
     snippets:
       - |
