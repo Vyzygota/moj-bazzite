@@ -22,4 +22,4 @@ modules:
         echo "Wstrzykiwanie wlasnych modulow (*.ko) do kernela: $CURRENT_KERNEL"
         mkdir -p /usr/lib/modules/$CURRENT_KERNEL/extra/custom
         cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$CURRENT_KERNEL/extra/custom/
-        depmod -a $CURRENT_KERNEL
+                depmod -a $CURRENT_KERNEL
