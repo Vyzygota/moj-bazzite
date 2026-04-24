@@ -4,15 +4,12 @@ base-image: ghcr.io/ublue-os/bazzite-deck-nvidia
 image-version: stable
 
 modules:
-  # 1. Zarządzanie pakietami systemowymi RPM
   - type: rpm-ostree
     repos:
       - copr:mrduarte/LenovoLegionLinux
     install:
       - kleopatra
-      # - python-LenovoLegionLinux # To jest aplikacja GUI od Lenovo
 
-  # 2. Zarządzanie pakietami Flatpak
   - type: default-flatpaks
     configurations:
       - scope: user
@@ -20,13 +17,6 @@ modules:
           - com.brave.Browser       
           - net.davidotek.pupgui2   
 
-  # 3. Kopiowanie sterowników NVIDIA (.rpm) i Lenovo (.ko)
-  - type: copy
-    from: ghcr.io/vyzygota/akmods-nvidia-7.0:latest
-    src: /rpms
-    dest: /tmp/custom-rpms
-
-  # 4. Skrypt podmieniający Kernel
   - type: script
     snippets:
       - |
@@ -34,36 +24,75 @@ modules:
         cat << EOF > /etc/yum.repos.d/fedora-rawhide.repo
         [rawhide]
         name=Fedora - Rawhide
-        baseurl=http://download.fedoraproject.org/pub/fedora/linux/development/rawhide/Everything/x86_64/os/
-        enabled=1
+        baseurl=http://download.fedoraproject.org/...
+        enabled=0 # FIX: ZMIENIONO NA 0, ABY NIE TRUĆ DNF5
         gpgcheck=0
         EOF
 
         echo "Pobieram najnowszy kernel..."
-        mkdir -p /tmp/latest-kernel
-        cd /tmp/latest-kernel
-        dnf5 download kernel kernel-core kernel-modules kernel-modules-core kernel-modules-extra kernel-devel --disablerepo="*" --enablerepo="rawhide"
-
-        echo "Finalna podmiana Kernela i Nvidii..."
-        rpm-ostree override replace \
-          --remove=kernel-devel-matched \
-          --remove=kernel-modules-akmods \
-          --remove=usbip \
-          --remove=kernel-nvidia \
-          /tmp/latest-kernel/*.rpm \
-          /tmp/custom-rpms/*.rpm
-          
-        echo "Wpinanie surowych modułów Lenovo..."
-        NEW_KERNEL=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" -p /tmp/latest-kernel/kernel-core-*.rpm | head -n 1)
-        mkdir -p /usr/lib/modules/$NEW_KERNEL/extra/lenovo
-        # POPRAWIONA ŚCIEŻKA (zgodna z Containerfile Twojego repo sterowników)
-        # cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$NEW_KERNEL/extra/lenovo/
-        if ls /tmp/custom-rpms/kmods/*.ko 2>/dev/null; then
-          cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$NEW_KERNEL/extra/lenovo/
-        fi
-        depmod -a $NEW_KERNEL
+        # ...
+        dnf5 download kernel ... --enablerepo="rawhide"
 
         echo "Instalacja GUI Lenovo..."
-        # POPRAWIONA SKŁADNIA DNF5 DLA COPR
         dnf5 copr enable -y mrduarte/LenovoLegionLinux
-        dnf5 install -y python-LenovoLegionLinux
+        dnf5 install -y python-LenovoLegionLinux`,
+    'Containerfile': `FROM fedora:rawhide AS builder
+
+# 1. Instalacja dnf5 i dkms
+RUN dnf install -y dnf5 && \\
+    dnf5 install -y akmods rpm-build gcc-c++ make systemd-devel findutils dkms
+
+# 2. Ręczne dopisanie repozytoriów
+RUN printf "[rpmfusion-free-rawhide]\\nname=RPM Fusion Rawhide Free\\nmetalink=https://mirrors.rpmfusion.org/metalink?...\\nenabled=1\\ngpgcheck=0\\n" > /etc/yum.repos.d/rpmfusion-free-rawhide.repo && \\
+    printf "[rpmfusion-nonfree-rawhide]\\nname=RPM Fusion Rawhide Nonfree\\nmetalink=https://mirrors.rpmfusion.org/metalink?...\\nenabled=1\\ngpgcheck=0\\n" > /etc/yum.repos.d/rpmfusion-nonfree-rawhide.repo
+
+# 3. Instalacja pełnego Kernela i Sterowników
+RUN dnf5 copr enable -y mrduarte/LenovoLegionLinux && \\
+    dnf5 install -y kernel kernel-core kernel-modules kernel-devel akmod-nvidia dkms dkms-LenovoLegionLinux
+
+# 4. Kompilacja
+RUN KERNEL_VERSION=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\\n" kernel-devel | head -n 1) && \\
+    akmods --force --kernels "$KERNEL_VERSION" && \\
+    # ...
+    find /var/lib/dkms/$DKMS_NAME/$DKMS_VER/$KERNEL_VERSION/ -name "*.ko" -exec cp {} /rpms/kmods/ \\;
+
+FROM scratch
+COPY --from=builder /var/cache/akmods/*/*.rpm /rpms/
+COPY --from=builder /rpms/kmods/ /rpms/kmods/`,
+    '.github/workflows/bluebuild.yml': `name: bluebuild
+on:
+  schedule:
+    - cron: "00 06 * * *"
+  push:
+    paths-ignore:
+      - "**.md"
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: \${{ github.workflow }}-\${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  bluebuild:
+    name: Build Custom Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        recipe:
+          - recipe.yml
+    steps:
+      - name: Build Custom Image
+        uses: blue-build/github-action@v1.11
+        with:
+          recipe: \${{ matrix.recipe }}
+          cosign_private_key: \${{ secrets.SIGNING_SECRET }}
+          registry_token: \${{ github.token }}
+          pr_event_number: \${{ github.event.number }}
+          maximize_build_space: true
+          build_opts: "-vv"
