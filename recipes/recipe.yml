@@ -1,7 +1,7 @@
 name: moj-bazzite
-description: Mój Bazzite - ciągle aktualny system ze zbudowaną Nvidią i agentem AI
-base-image: ghcr.io/ublue-os/bazzite-deck
-# Bazzite pobierany w wersji absolutnie najświeższej z dnia budowania
+description: Mój Bazzite Deck - ciągle aktualny system ze zbudowaną Nvidią i agentem AI
+base-image: ghcr.io/ublue-os/bazzite-deck-nvidia
+# Bazzite Deck pobierany w wersji absolutnie najświeższej z dnia budowania
 image-version: latest
 
 modules:
@@ -16,7 +16,7 @@ modules:
         echo "=========================================================="
         echo "1. Wstrzykiwanie Rdzenia: Najnowszy Linux Kernel + NVIDIA"
         echo "=========================================================="
-        # Pobieramy wersje biezacego kernela zainstalowanego w obrazie Bazzite
+        # Pobieramy wersje biezacego kernela zainstalowanego w obrazie Bazzite Deck
         CURRENT_KERNEL=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" kernel | head -n 1)
         
         echo "Wstrzykiwanie wlasnych modulow (*.ko) do kernela: $CURRENT_KERNEL"
