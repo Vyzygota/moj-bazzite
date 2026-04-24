@@ -1,33 +1,33 @@
-🚀 Personalized Bazzite (NVIDIA Edition)
-A custom, atomic gaming OS based on Bazzite, designed for users who refuse to wait for upstream updates. This image is automatically re-baked with the absolute latest technologies available in the Linux ecosystem.
+# 🚀 Personalized Bazzite Deck (NVIDIA Edition)
 
-🛠 Key Features
-Cutting-Edge Kernel: Always compiled with the latest Linux Kernel (sourced directly from Fedora Rawhide).
+A custom, atomic gaming OS based on Bazzite, designed for gamers and power-users who demand cutting-edge performance. This image combines the streamlined console-like interface of Steam Deck with hardware-accelerated drivers tailored specifically for NVIDIA systems.
 
-Latest NVIDIA Drivers: Pre-installed with the newest NVIDIA proprietary drivers for maximum GPU performance and DLSS support.
+_**⚡ Engineered with Google Gemini:** This repository's architecture, including its custom kernel build pipeline and deployment strategies, was co-created with the **Gemini AI Agent (Antigravity)** to ensure maximum stability and zero-day module injection._
 
-Gaming Ready: Includes ProtonGE (via ProtonUp-Qt) and system-level optimizations for handhelds and desktops.
+## 🎮 Key Features
 
-Brave Browser: Pre-configured as a Flatpak for secure, high-performance browsing.
+*   **Console-Level Experience:** Based on bazzite-deck-nvidia, bringing the seamless Gamescope (SteamUI) console interface natively to your NVIDIA-powered machine.
+*   **Zero-Day NVIDIA Drivers:** Built via an independent CI/CD pipeline (akmods-nvidia-custom) fetching the bleeding-edge NVIDIA proprietary drivers so you get maximum FPS and DLSS support without waiting for upstream updates.
+*   **Surgical Module Injection:** Automatically extracts your custom *.ko modules and wires them precisely into the current Linux kernel via depmod, preserving atomic OS integrity.
+*   **Gaming Ready Out-of-the-Box:** Includes ProtonGE (via ProtonUp-Qt), Brave Browser as Flatpak, Kleopatra for security, and system-level optimizations for modern gaming on desktop and handhelds.
+*   **Immutable & Bulletproof:** Powered by BlueBuild and rpm-ostree. If an update breaks, you can instantly roll back to the previous snapshot.
 
-Security: Built-in Kleopatra for advanced GPG/encryption management.
+## 📥 Installation
 
-📥 Installation (Rebase)
-If you are already on Bazzite or any Fedora-based atomic desktop, you can switch to this image with a single command:
+Ready to unleash your GPU? Rebase your Fedora/Bazzite installation instantly:
 
-Bash:
-```
+```bash
 rpm-ostree rebase ostree-unverified-registry:ghcr.io/vyzygota/moj-bazzite:latest
 ```
+Reboot your machine, and you're fully geared up.
 
-⚙️ Build System
-This repository uses BlueBuild to ensure a consistent, reliable, and reproducible build process via GitHub Actions. Every update to this repository triggers a fresh build with the newest available packages.
+---
 
-Pro-tip do "About" na boku repozytorium:
-W prawym górnym rogu GitHuba, w sekcji About, wklej krótki, "mięsisty" opis:
+### 💡 Pro-tip: "About" Section for GitHub
 
-⚡ Custom Bazzite image with latest Fedora Rawhide Kernel and newest NVIDIA drivers. Includes Brave, Kleopatra, and ProtonGE optimizations.
+Copy and paste this into the "About" section on your repository:
 
+> ⚡ Custom atomic gaming OS: Bazzite Deck optimized for NVIDIA GPUs. Bleeding-edge drivers injected via CI/CD, SteamOS console experience on PC. Co-engineered with Gemini AI.
 
 # BlueBuild Template &nbsp; [![bluebuild build badge](https://github.com/blue-build/template/actions/workflows/build.yml/badge.svg)](https://github.com/blue-build/template/actions/workflows/build.yml)
 
