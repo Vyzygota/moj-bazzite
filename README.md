@@ -23,12 +23,6 @@ Reboot your machine, and you're fully geared up.
 
 ---
 
-### 💡 Pro-tip: "About" Section for GitHub
-
-Copy and paste this into the "About" section on your repository:
-
-> ⚡ Custom atomic gaming OS: Bazzite Deck optimized for NVIDIA GPUs. Bleeding-edge drivers injected via CI/CD, SteamOS console experience on PC. Co-engineered with Gemini AI.
-
 # BlueBuild Template &nbsp; [![bluebuild build badge](https://github.com/blue-build/template/actions/workflows/build.yml/badge.svg)](https://github.com/blue-build/template/actions/workflows/build.yml)
 
 See the [BlueBuild docs](https://blue-build.org/how-to/setup/) for quick setup instructions for setting up your own repository based on this template.
