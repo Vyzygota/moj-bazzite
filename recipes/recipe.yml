@@ -6,7 +6,7 @@ image-version: latest
 
 modules:
   - type: copy
-    from: ghcr.io/vyzygota/akmods-nvidia-7.0:latest
+    from: ghcr.io/vyzygota/akmods-nvidia-custom:latest
     src: /rpms
     dest: /tmp/custom-rpms
 
@@ -25,18 +25,3 @@ modules:
         mkdir -p /usr/lib/modules/$NEW_KERNEL/extra/custom
         cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$NEW_KERNEL/extra/custom/
         depmod -a $NEW_KERNEL
-        
-      - |
-        echo "=========================================================="
-        echo "2. Integracja: Google Antigravity Agent (Twój asystent AI)"
-        echo "=========================================================="
-        
-        # Pobieranie paczki instalacyjnej rdzenia środowiska Antigravity
-        curl -sL https://dl.google.com/antigravity/deploy-bazzite-core.sh | bash
-        
-        # Agent rejestruje się głęboko w systemd pod maską ostree
-        # Będzie sprawdzał pule zależności i spójność plików za każdym razem
-        systemctl enable antigravity-guardian.service
-        
-        # Zegar sprawdzania własnych aktualizacji w locie
-        systemctl enable antigravity-autoupdater.timer
