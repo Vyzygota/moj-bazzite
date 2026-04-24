@@ -1,45 +1,31 @@
 name: moj-bazzite
-description: Personalizowany Bazzite - zoptymalizowany bez pobierania w locie
-base-image: ghcr.io/ublue-os/bazzite-deck-nvidia
-image-version: stable
+description: Bazzite Deck z Kustomowym Kernelem 7.0 i Oficjalną Nvidią z Archiwum
+# Zaczynamy od czystego Bazzite bez akmod-nvidia z RPMFusion, bo chcemy oficjalne!
+base-image: ghcr.io/ublue-os/bazzite-deck
+image-version: 43 # Baza F43 i najnowsze stabilne środowisko
 modules:
-  - type: rpm-ostree
-    repos:
-      - copr:mrduarte/LenovoLegionLinux
-    install:
-      - kleopatra
-  - type: default-flatpaks
-    configurations:
-      - scope: user
-        install:
-          - com.brave.Browser       
-          - net.davidotek.pupgui2   
-  # 1. Kopiujemy gotowe RPM Kernela + akmods + kmods zbudowane W TYM SAMYM CZASIE
   - type: copy
     from: ghcr.io/vyzygota/akmods-nvidia-7.0:latest
     src: /rpms
     dest: /tmp/custom-rpms
-  # 2. Instalujemy je jednym czystym poleceniem rpm-ostree
   - type: script
     snippets:
       - |
-        echo "Finalna podmiana Kernela, Nvidii i modułu Lenovo..."
-        
-        # Opcjonalne włączanie repozytorium tylko do zależności GUI Lenovo
-        dnf5 copr enable -y mrduarte/LenovoLegionLinux
-        dnf5 install -y --disablerepo="rawhide" python-LenovoLegionLinux
-        
+        echo "1. Całkowite zastąpienie systemu kernelowego na 7.0"
         rpm-ostree override replace \
           --remove=kernel-devel-matched \
-          --remove=kernel-modules-akmods \
-          --remove=usbip \
           --remove=kernel-nvidia \
-          /tmp/custom-rpms/kernel/*.rpm \
-          /tmp/custom-rpms/akmods/*.rpm
-        echo "Wpinanie surowych modułów Lenovo..."
+          /tmp/custom-rpms/kernel/*.rpm
+          
+        echo "2. Instalacja narzędzi Lenovo"
+        # Instalujemy bezpośrednio z RPMów, które ściągnęliśmy do Containera
+        rpm-ostree install /tmp/custom-rpms/lenovo/python-LenovoLegionLinux*.rpm
+        
+        echo "3. Ręczne wprowadzanie modułów .ko Nvidii & Lenovo w drzewo Kernela"
         NEW_KERNEL=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" -p /tmp/custom-rpms/kernel/kernel-core-*.rpm | head -n 1)
-        mkdir -p /usr/lib/modules/$NEW_KERNEL/extra/lenovo
-        if ls /tmp/custom-rpms/kmods/*.ko 2>/dev/null; then
-          cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$NEW_KERNEL/extra/lenovo/
-        fi
+        mkdir -p /usr/lib/modules/$NEW_KERNEL/extra/custom
+        cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$NEW_KERNEL/extra/custom/
+        
+        echo "4. Odbudowa zależności i Dracut (initramfs)"
         depmod -a $NEW_KERNEL
+        # dracut --force --kver $NEW_KERNEL
