@@ -1,31 +1,40 @@
-name: moj-bazzite
-description: Bazzite Deck z Kustomowym Kernelem 7.0 i Oficjalną Nvidią z Archiwum
-# Zaczynamy od czystego Bazzite bez akmod-nvidia z RPMFusion, bo chcemy oficjalne!
+name: pancernik-os
+description: Pancernik OS - Samonaprawiający się, ciągle aktualny system z agentem AI
 base-image: ghcr.io/ublue-os/bazzite-deck
-image-version: 43 # Baza F43 i najnowsze stabilne środowisko
+# Bazzite pobierany w wersji absolutnie najświeższej z dnia budowania
+image-version: latest
 modules:
   - type: copy
-    from: ghcr.io/vyzygota/akmods-nvidia-7.0:latest
+    from: ghcr.io/vyzygota/akmods-pancernik:latest
     src: /rpms
     dest: /tmp/custom-rpms
   - type: script
     snippets:
       - |
-        echo "1. Całkowite zastąpienie systemu kernelowego na 7.0"
+        echo "=========================================================="
+        echo "1. Wstrzykiwanie Rdzenia: Najnowszy Linux Kernel + NVIDIA"
+        echo "=========================================================="
         rpm-ostree override replace \
           --remove=kernel-devel-matched \
           --remove=kernel-nvidia \
           /tmp/custom-rpms/kernel/*.rpm
           
-        echo "2. Instalacja narzędzi Lenovo"
-        # Instalujemy bezpośrednio z RPMów, które ściągnęliśmy do Containera
-        rpm-ostree install /tmp/custom-rpms/lenovo/python-LenovoLegionLinux*.rpm
-        
-        echo "3. Ręczne wprowadzanie modułów .ko Nvidii & Lenovo w drzewo Kernela"
         NEW_KERNEL=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" -p /tmp/custom-rpms/kernel/kernel-core-*.rpm | head -n 1)
         mkdir -p /usr/lib/modules/$NEW_KERNEL/extra/custom
         cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$NEW_KERNEL/extra/custom/
-        
-        echo "4. Odbudowa zależności i Dracut (initramfs)"
         depmod -a $NEW_KERNEL
-        # dracut --force --kver $NEW_KERNEL
+        
+      - |
+        echo "=========================================================="
+        echo "2. Integracja: Google Antigravity Agent (Twój asystent AI)"
+        echo "=========================================================="
+        
+        # Pobieranie paczki instalacyjnej rdzenia środowiska Antigravity
+        curl -sL https://dl.google.com/antigravity/deploy-bazzite-core.sh | bash
+        
+        # Agent rejestruje się głęboko w systemd pod maską ostree
+        # Będzie sprawdzał pule zależności i spójność plików za każdym razem
+        systemctl enable antigravity-guardian.service
+        
+        # Zegar sprawdzania własnych aktualizacji w locie
+        systemctl enable antigravity-autoupdater.timer
