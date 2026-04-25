@@ -20,8 +20,8 @@ modules:
         
         # Oczyszczamy pobrane w akmods paczki z tych, których nie ma w Bazzite (np. devel, headers)
         # Bazzite to system atomowy i nie zawiera nagłówków deweloperskich. Próba ich podmiany (override replace)
-        # spowodowałaby błąd i anulowanie całego procesu.
-        rm -f /tmp/custom-rpms/kernel/kernel-devel*.rpm /tmp/custom-rpms/kernel/kernel-headers*.rpm /tmp/custom-rpms/kernel/kernel-tools*.rpm
+        # spowodowałaby błąd i anulowanie całego procesu. Usuwamy też pliki źródłowe (*.src.rpm).
+        rm -f /tmp/custom-rpms/kernel/kernel-devel*.rpm /tmp/custom-rpms/kernel/kernel-headers*.rpm /tmp/custom-rpms/kernel/kernel-tools*.rpm /tmp/custom-rpms/kernel/*.src.rpm
         
         # Pobieramy wersje starego kernela, by wyciac go bez sladu
         OLD_KERNEL=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" kernel-core | head -n 1)
