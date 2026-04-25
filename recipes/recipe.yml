@@ -27,8 +27,15 @@ modules:
         OLD_KERNEL=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" kernel-core | head -n 1)
         echo "Wykryto stary kernel bazowy: $OLD_KERNEL"
         
-        echo "Zastepuje bazowy kernel Bazzite wersja Vanilla z ktorej kompilowalismy moduly..."
-        rpm-ostree override replace /tmp/custom-rpms/kernel/*.rpm
+        REMOVE_ARGS=""
+        for pkg in kernel-devel-matched kernel-modules-akmods; do
+            if rpm -q $pkg >/dev/null 2>&1; then
+                REMOVE_ARGS="$REMOVE_ARGS --remove $pkg"
+            fi
+        done
+        
+        echo "Zastepuje bazowy kernel Bazzite wersja Vanilla z ktorej kompilowalismy moduly, dostarczajac dummy Nvidii..."
+        rpm-ostree override replace /tmp/custom-rpms/kernel/*.rpm /tmp/custom-rpms/dummy/*.rpm $REMOVE_ARGS
         
         echo "Calkowite usuniecie poprzedniego kernela ($OLD_KERNEL) zeby nie bylo po nim sladu..."
         rm -rf /usr/lib/modules/$OLD_KERNEL
