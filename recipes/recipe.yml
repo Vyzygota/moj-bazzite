@@ -13,13 +13,30 @@ modules:
   - type: script
     snippets:
       - |
+        set -e
         echo "=========================================================="
         echo "1. Wstrzykiwanie Rdzenia: Najnowszy Linux Kernel + NVIDIA"
         echo "=========================================================="
-        # Pobieramy wersje biezacego kernela zainstalowanego w obrazie Bazzite Deck
-        CURRENT_KERNEL=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" kernel | head -n 1)
         
-        echo "Wstrzykiwanie wlasnych modulow (*.ko) do kernela: $CURRENT_KERNEL"
-        mkdir -p /usr/lib/modules/$CURRENT_KERNEL/extra/custom
-        cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$CURRENT_KERNEL/extra/custom/
-                depmod -a $CURRENT_KERNEL
+        # Oczyszczamy pobrane w akmods paczki z tych, których nie ma w Bazzite (np. devel, headers)
+        # Bazzite to system atomowy i nie zawiera nagłówków deweloperskich. Próba ich podmiany (override replace)
+        # spowodowałaby błąd i anulowanie całego procesu.
+        rm -f /tmp/custom-rpms/kernel/kernel-devel*.rpm /tmp/custom-rpms/kernel/kernel-headers*.rpm /tmp/custom-rpms/kernel/kernel-tools*.rpm
+        
+        # Pobieramy wersje starego kernela, by wyciac go bez sladu
+        OLD_KERNEL=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" kernel-core | head -n 1)
+        echo "Wykryto stary kernel bazowy: $OLD_KERNEL"
+        
+        echo "Zastepuje bazowy kernel Bazzite wersja Vanilla z ktorej kompilowalismy moduly..."
+        rpm-ostree override replace /tmp/custom-rpms/kernel/*.rpm
+        
+        echo "Calkowite usuniecie poprzedniego kernela ($OLD_KERNEL) zeby nie bylo po nim sladu..."
+        rm -rf /usr/lib/modules/$OLD_KERNEL
+        
+        # Pobieramy wersje *nowego* kernela, ktory przed chwila zainstalowalusmy w ostree
+        NEW_KERNEL=$(rpm -qp --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" /tmp/custom-rpms/kernel/kernel-core-*.rpm | head -n 1)
+        
+        echo "Wstrzykiwanie wlasnych modulow (*.ko) do kernela: $NEW_KERNEL"
+        mkdir -p /usr/lib/modules/$NEW_KERNEL/extra/custom
+        cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$NEW_KERNEL/extra/custom/
+        depmod -a $NEW_KERNEL
