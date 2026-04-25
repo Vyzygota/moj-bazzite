@@ -5,6 +5,15 @@ base-image: ghcr.io/ublue-os/bazzite-deck-nvidia
 image-version: latest
 
 modules:
+  - type: rpm-ostree
+    install:
+      - python3-PyQt6
+      - python3-pip
+      - python3-yaml
+      - python3-argcomplete
+      - dmidecode
+      - lm_sensors
+
   - type: copy
     from: ghcr.io/vyzygota/akmods-nvidia-custom:latest
     src: /rpms
@@ -15,7 +24,7 @@ modules:
       - |
         set -e
         echo "=========================================================="
-        echo "1. Wstrzykiwanie Rdzenia: Najnowszy Linux Kernel + NVIDIA"
+        echo "1. Wstrzykiwanie Rdzenia: Najnowszy Linux Kernel + NVIDIA + LenovoLegionLinux"
         echo "=========================================================="
         
         # Oczyszczamy pobrane w akmods paczki z tych, których nie ma w Bazzite (np. devel, headers)
@@ -47,3 +56,12 @@ modules:
         mkdir -p /usr/lib/modules/$NEW_KERNEL/extra/custom
         cp /tmp/custom-rpms/kmods/*.ko /usr/lib/modules/$NEW_KERNEL/extra/custom/
         depmod -a $NEW_KERNEL
+
+        echo "Pobieranie i instalacja LenovoLegionLinux GUI..."
+        mkdir -p /tmp/lll
+        wget -q https://github.com/johnfanv2/LenovoLegionLinux/archive/refs/heads/main.tar.gz -O /tmp/lll/main.tar.gz
+        tar -xf /tmp/lll/main.tar.gz -C /tmp/lll
+        
+        cd /tmp/lll/LenovoLegionLinux-main/python/legion_linux
+        pip install --prefix=/usr darkdetect --break-system-packages
+        pip install --prefix=/usr --no-deps . --break-system-packages
