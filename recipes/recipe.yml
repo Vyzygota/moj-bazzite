@@ -65,15 +65,39 @@ modules:
         cd /tmp/lll/LenovoLegionLinux-main/python/legion_linux
         pip install --prefix=/usr darkdetect --break-system-packages
         pip install --prefix=/usr --no-deps . --break-system-packages
+        
+        # Opcjonalne upewnienie się, że skróty trafiają w dobre miejsce:
+        cp -af /tmp/lll/LenovoLegionLinux-main/python/legion_linux/legion_linux/legion_gui.desktop /usr/share/applications/ 2>/dev/null || true
+        cp -af /tmp/lll/LenovoLegionLinux-main/python/legion_linux/legion_linux/legion_cli.policy /usr/share/polkit-1/actions/ 2>/dev/null || true
+        cp -af /tmp/lll/LenovoLegionLinux-main/python/legion_linux/legion_linux/legion_gui.policy /usr/share/polkit-1/actions/ 2>/dev/null || true
 
-        echo "Instalacja CLI: Antigravity Agent..."
+        echo "Instalacja GUI: Antigravity Agent..."
         cat << 'EOF' > /usr/bin/antigravity
         #!/bin/bash
-        echo "========================================="
-        echo "🚀 Google Gemini Agent (Antigravity)"
-        echo "Status: AKTYWNY w systemie bazowym (Bazzite-NVIDIA)"
-        echo "Wersja Jądra: $(uname -r)"
-        echo "Moduły: LenovoLegionLinux gotowy!"
-        echo "========================================="
+        if command -v zenity &> /dev/null; then
+          zenity --info --title="Antigravity Agent"                  --text="🚀 <b>Google Gemini Agent (Antigravity)</b>
+
+Status: <b>AKTYWNY</b> w systemie (Bazzite-NVIDIA)
+Wersja Jądra: <b>$(uname -r)</b>
+Osiągnięcia: LenovoLegionLinux poprawnie zintegrowany!"                  --width=400 --window-icon=system-run
+        else
+          echo "========================================="
+          echo "🚀 Google Gemini Agent (Antigravity)"
+          echo "Status: AKTYWNY w systemie bazowym (Bazzite-NVIDIA)"
+          echo "Wersja Jądra: $(uname -r)"
+          echo "Moduły: LenovoLegionLinux gotowy!"
+          echo "========================================="
+        fi
         EOF
         chmod +x /usr/bin/antigravity
+
+        cat << 'EOF' > /usr/share/applications/antigravity.desktop
+        [Desktop Entry]
+        Name=Antigravity Agent
+        Comment=Systemowy Agent Modułów AI
+        Exec=/usr/bin/antigravity
+        Icon=system-run
+        Terminal=false
+        Type=Application
+        Categories=System;Utility;
+        EOF
